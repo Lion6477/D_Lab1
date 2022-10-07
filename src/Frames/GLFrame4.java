@@ -20,11 +20,15 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
     private int vao[]=new int[1];
     //private float VPositions1[]= {0.2f, 0.2f,   0f,   0.2f,	0.5f,  0f,   0.5f, 0.1f, 0f};
     //                            X1    Y1      Z1    X2    Y2     Z2    X3    Y3    Z3
-    private float VPositions1[]= {0.3f,   0.3f,   0f,   0.3f,   0.8f,   0f,     0.8f,   0.3f,    0f,
+    /*private float VPositions1[]= {0.3f,   0.3f,   0f,   0.3f,   0.8f,   0f,     0.8f,   0.3f,    0f,
                                   0.3f,   0.3f,   0f,   0.3f,   0.8f,   0f,     0.6f,   0.4f,    0.8f,
                                   0.3f,   0.3f,   0f,   0.6f,   0.4f,   0.8f,   0.8f,   0.3f,    0f,
                                   0.3f,   0.8f,   0f,   0.8f,   0.3f,   0f,     0.6f,    0.4f,   0.8f
-    };
+    };*/
+
+    private float VPositions1[] = {
+
+        };
     private float VPositions2[]= {-0.2f, -0.2f, 0.0f, 0,    -0.2f, 0.0f, 0,    0f,   0.0f};
     private int program;
     private GLCanvas Canvas;
