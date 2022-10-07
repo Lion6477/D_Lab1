@@ -6,6 +6,7 @@ import java.nio.FloatBuffer;
 import javax.swing.JFrame;
 
 import com.jogamp.common.nio.Buffers;
+import com.jogamp.graph.geom.Triangle;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLContext;
@@ -26,9 +27,7 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
                                   0.3f,   0.8f,   0f,   0.8f,   0.3f,   0f,     0.6f,    0.4f,   0.8f
     };*/
 
-    private float VPositions1[] = {
-
-        };
+    private float VPositions1[];
     private float VPositions2[]= {-0.2f, -0.2f, 0.0f, 0,    -0.2f, 0.0f, 0,    0f,   0.0f};
     private int program;
     private GLCanvas Canvas;
@@ -150,7 +149,7 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
 
         gl.glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-        gl.glDrawArrays(GL_TRIANGLES, 0, 12); //постановка у чергу на рисування 3 вершин з АКТИВНОГО буфера vbo[0]
+        gl.glDrawArrays(GL_TRIANGLES, 0, VPositions1.length / 3);//постановка у чергу на рисування 3 вершин з АКТИВНОГО буфера vbo[0]
 
 //активація буфера		
         gl.glBindBuffer(GL_ARRAY_BUFFER,  vbo[1]); //активізація буфера vbo[1]
@@ -172,6 +171,9 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
 
     @Override
     public void init(GLAutoDrawable arg0) {
+        Triangles sphere = new Triangles();
+        VPositions1 = sphere.sphere();
+
         GL4 gl=(GL4) GLContext.getCurrentGL();
         program=MakeProgram();
         gl.glGenVertexArrays(1, vao,0);
