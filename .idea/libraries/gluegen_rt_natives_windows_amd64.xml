@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="gluegen-rt-natives-windows-amd64">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/OpenGL/gluegen-rt-natives-windows-amd64.jar!/" />
+      <root url="jar://$PROJECT_DIR$/OpenGL/graphicslib3D.jar!/" />
+      <root url="jar://$PROJECT_DIR$/OpenGL/jogl-all.jar!/" />
+      <root url="jar://$PROJECT_DIR$/OpenGL/jogl-all-natives-windows-amd64.jar!/" />
+      <root url="jar://$PROJECT_DIR$/OpenGL/mathlib3D.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
