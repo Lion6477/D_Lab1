@@ -147,7 +147,7 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         gl.glEnable(GL_DEPTH_TEST);
         gl.glDepthFunc(GL_LEQUAL);
 
-        gl.glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //gl.glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         gl.glDrawArrays(GL_TRIANGLES, 0, VPositions1.length / 3);//постановка у чергу на рисування 3 вершин з АКТИВНОГО буфера vbo[0]
 
