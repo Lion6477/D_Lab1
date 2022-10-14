@@ -1,5 +1,7 @@
 package Frames;
 
+import java.util.Arrays;
+
 class Matrix {
     public static float[] matrix(float[] matrix1, float[] matrix2){
         float result[] = new float[16];
@@ -72,6 +74,48 @@ class Matrix {
 
         return result;
     };
+
+    static public float [] inverse(float [] A){
+        float [] B = Arrays.copyOf(A, A.length);
+        float [] res = new float[] {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+        float max,max1,d;
+        int i,j,k,num,NumOfElGauss =4;
+        for (i = 0;i<= NumOfElGauss-1;i++){
+            max = B[4*i+i];
+            num = i;
+            for(j=i;j<=NumOfElGauss-1;j++){
+                if (Math.abs(max) < Math.abs(B[4*j+i])) {
+                    max = B[4*j+i];
+                    num = j;
+                }
+            }
+            max1=1f/max;
+            for (j = 0;j<= NumOfElGauss-1;j++){
+                d = B[4*i+j];
+                B[4*i+j] = B[4*num+j];
+                B[4*num+j] = d;
+                B[4*i+j] = B[4*i+j] * max1;
+                d = res[4*i+j];
+                res[4*i+j] = res[4*num+j];
+                res[4*num+j] = d;
+                res[4*i+j] = res[4*i+j] * max1;
+            }
+
+            for (j = 0;j<= NumOfElGauss-1;j++){
+                if (j != i){
+                    d = B[4*j+i];
+                    for (k = i;k<=NumOfElGauss-1;k++){
+                        B[4*j+k] = B[4*j+k] - B[4*i+k]*d;
+                    }
+                    for (k = 0;k<=NumOfElGauss-1;k++){
+                        res[4*j+k] = res[4*j+k] - res[4*i+k]*d;
+                    }
+                }
+            }
+        }
+
+        return res;
+    }
 
     void outputArr(float [] A) {
         for(int i=0;i<A.length; i++) {

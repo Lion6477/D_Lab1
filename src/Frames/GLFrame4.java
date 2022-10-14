@@ -31,6 +31,9 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
 //    private float VPositions2[]= {-0.2f, -0.2f, 0.0f, 0,    -0.2f, 0.0f, 0,    0f,   0.0f};
     private int program;
     private GLCanvas Canvas;
+    float phi;
+    float phi1;
+    float phi2;
     private float x=0f;
     private float y=0f;
     private float z=0f;
@@ -42,9 +45,6 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
     private float xS = 0.3f;
     private float yS = 0.3f;
     private float zS = 0f;
-    private float xSS = 0.7f;
-    private float ySS = 0.7f;
-    private float zSS = 0f;
 
     private float q = 0.3f;
     private float w = 0.3f;
@@ -58,20 +58,14 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
     private float wS = 0.1f;
     private float rS = 0.1f;
 
-
-    float phi;
-    float phi1;
-    float phi2;
     float phiP;
     float DphiP = 0.1f;
 
     float phiPP;
-    float DphiPP = 0.1f;
 
     float phiS;
-    float DphiS = 0.1f;
     float phiSS;
-    float DphiSS = 0.1f;
+
 
     public GLFrame4() {
         Canvas=new GLCanvas();
@@ -90,20 +84,45 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         GL4 gl=(GL4) GLContext.getCurrentGL();
         String vSource[]= {
                 "#version 430\n",
-                "layout (location=0) in vec3 pos;" //змінна pos приймає дані з активного буфера
+                "layout (location=0) in vec3 pos;"//змінна pos приймає дані з активного буфера
+                + "layout (location=1) in vec3 normal;"
                         + "uniform mat4 model;" //matB -- матриця 4х4, яка передається з Java
+                        + "uniform mat4 normalMat;"
 
                         + "uniform float x;"
                         + "uniform float y;"
                         + "uniform float z;"
 
+                        + "vec3 normalVec;"
+                        + "vec3 light;"
+                        + "vec3 light_Ambient;"
+                        + "vec3 material;"
+                        + "vec3 light_Diffuse;"
+                        + "vec3 light_intens;"
+                        + "vec3 vecT;"
+                        + "vec4 vecTemp;"
+
                         + "out vec4 varyingColor;"
+
                         + "void main(void){"
+
+                        + "light_Ambient = vec3(0.1, 0.1, 0.1);"
+                        + "material = vec3(1, 0, 0);"
+                        + "light_Diffuse = vec3(0, 0, 0);"
+                        + "light_intens = vec3(1, 1, 1);"
+
+
                         //+ "gl_Position=matA*vec4(pos, 1);"// множення матриці на вектор. Дія "*" перевизначена у GLSL
 
-                        + "gl_Position=model* vec4(pos, 1);"
-                        
-                        + "varyingColor=vec4(0.0, 0.0+pos.z, 1.0, 1);"
+                        + "gl_Position = model * vec4(pos, 1);"
+                        + "vecT = vec3(0, 0, 0) - gl_Position.xyz;"
+                        + "vecTemp = normalMat * vec4(normal, 1);"
+                        + "normalVec = normalize(vecTemp.xyz);"
+                        + "light_Diffuse = light_intens * material * max(dot(normalVec, vecT), 0);"
+                        + "light = light_Ambient + light_Diffuse;"
+
+                        + "varyingColor=vec4(light * material, 1);"
+                        //+ "varyingColor=vec4(1, 0, 0, 1);"
                         + "}\n"
         },
                 fSource[]= {
@@ -141,14 +160,15 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         FloatBuffer bkg= Buffers.newDirectFloatBuffer(Col);
         gl.glClearBufferfv(GL_COLOR, 0, bkg);
 
+
+
         //Звезда
         //float  [] B = Matrix.rotate(phi, phi1, phi2, 0.3f, 0.3f, 0f);
         float  [] X = Matrix.zooming(q, w, r);
         //float  [] F = Matrix.moving(x, y, z);
 
         float  [] model = X;
-
-        float []A=new float[] {1f,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};//одинична матриця
+        float [] normalMat = Matrix.inverse(model);
 
 //передача змінної у шейдер		
         int X_location=gl.glGetUniformLocation(program, "x"); // посилання на (положення) "x" у шейдері
@@ -158,6 +178,9 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
 //передача матриці у шейдер. Матриця 4х4 - це ОДНОМІРНИЙ масив з 16 елементів
         int matModel_location=gl.glGetUniformLocation(program, "model"); //посилання на положення матриці matA у шейдері
         gl.glUniformMatrix4fv(matModel_location, 1, true, model, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
+
+        int matNormal_location=gl.glGetUniformLocation(program, "normalMat"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matNormal_location, 1, false, normalMat, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
 
 
         int Y_location=gl.glGetUniformLocation(program, "y"); // посилання на (положення) "x" у шейдері
@@ -188,6 +211,10 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         float  [] BPP = Matrix.rotate(0, 0, phiPP, 0, 0, 0);
 
         float  [] modelP = Matrix.matrix(Matrix.matrix(Matrix.matrix(BPP, FP), BP), XP);
+        normalMat = Matrix.inverse(modelP);
+
+        matNormal_location=gl.glGetUniformLocation(program, "normalMat"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matNormal_location, 1, false, normalMat, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
 
         int matModel_locationP=gl.glGetUniformLocation(program, "model"); //посилання на положення матриці matA у шейдері
         gl.glUniformMatrix4fv(matModel_locationP, 1, true, modelP, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
@@ -199,14 +226,18 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         float  [] BS = Matrix.rotate(0, 0, phiS, 0, 0, 0);
         float  [] FS = Matrix.moving(xS, yS, zS);
         float  [] BSS = Matrix.rotate(0, 0, phiSS, 0, 0, 0);
-        float  [] FSS = Matrix.moving(xSS, ySS, zSS);
-        float  [] BSSS = Matrix.rotate(0, 0, phiPP, 0, 0, 0);
 
-        float  [] modelS = Matrix.matrix(BSSS,
-                Matrix.matrix(FSS,
+//        float  [] FSS = Matrix.moving(xSS, ySS, zSS);
+//        float  [] BSSS = Matrix.rotate(0, 0, phiPP, 0, 0, 0);
+
+        float  [] modelS = Matrix.matrix(BPP,
+                Matrix.matrix(FP,
                         Matrix.matrix(BSS,
                                 Matrix.matrix(FS,
                                         Matrix.matrix(BS, XS)))));
+        normalMat = Matrix.inverse(modelS);
+        matNormal_location=gl.glGetUniformLocation(program, "normalMat"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matNormal_location, 1, false, normalMat, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
 
         int matModel_locationS=gl.glGetUniformLocation(program, "model"); //посилання на положення матриці matA у шейдері
         gl.glUniformMatrix4fv(matModel_locationS, 1, true, modelS, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
@@ -215,10 +246,11 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
 
 
 
-////активація буфера
-//        gl.glBindBuffer(GL_ARRAY_BUFFER,  vbo[1]); //активізація буфера vbo[1]
-//        gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-//        gl.glEnableVertexAttribArray(0); //layout (location=0) -- 0 - номер змінної у шейдері, яка приймає дані з буфера
+
+    //активація буфера
+        gl.glBindBuffer(GL_ARRAY_BUFFER,  vbo[1]); //активізація буфера vbo[1]
+        gl.glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
+        gl.glEnableVertexAttribArray(1); //layout (location=0) -- 0 - номер змінної у шейдері, яка приймає дані з буфера
 //
 ////передача змінної у шейдер
 //        gl.glProgramUniform1f(program, X_location, 0);// записуємо 0 у шейдер змінну за посиланням X_location. Посилання на змінну вже отримали раніше
@@ -238,6 +270,7 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         Triangles sphere = new Triangles();
         VPositions1 = sphere.sphere();
 
+
         GL4 gl=(GL4) GLContext.getCurrentGL();
         program=MakeProgram();
         gl.glGenVertexArrays(1, vao,0);
@@ -247,9 +280,9 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         FloatBuffer f= Buffers.newDirectFloatBuffer(VPositions1);
         gl.glBufferData(GL_ARRAY_BUFFER, f.limit()*4, f, GL_STATIC_DRAW);//записуємо у АКТИВНИЙ буфер vbo[0]
 
-//        gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);// 1-й буфер АКТИВНИЙ vbo[1]
-//        FloatBuffer f2=Buffers.newDirectFloatBuffer(VPositions2);
-//        gl.glBufferData(GL_ARRAY_BUFFER, f2.limit()*4, f2,GL_STATIC_DRAW);//записуємо у АКТИВНИЙ буфер vbo[1]
+        gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);// 1-й буфер АКТИВНИЙ vbo[1]
+        FloatBuffer f2=Buffers.newDirectFloatBuffer(sphere.normalsVec);
+        gl.glBufferData(GL_ARRAY_BUFFER, f2.limit()*4, f2,GL_STATIC_DRAW);//записуємо у АКТИВНИЙ буфер vbo[1]
 
     }
 
@@ -272,10 +305,10 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         }
 
         if(e.getKeyCode()==KeyEvent.VK_SPACE) {
-            DphiP += 0.1f;
-            DphiPP += 0.1f;
-            DphiS += 0.1f;
-            DphiSS += 0.1f;
+            phiP += 1f ;
+            phiPP += 5f;
+            phiS += 10f;
+            phiSS += 7f;
 
         }
 //        if(e.getKeyCode()==KeyEvent.VK_I) {

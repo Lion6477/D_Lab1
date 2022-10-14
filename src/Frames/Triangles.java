@@ -1,6 +1,7 @@
 package Frames;
 
 public class Triangles {
+    float normalsVec[];
     int points_phi  = 30;
     int points_teta = 30;
     float phi = 0, phi1, phi2, phi3, phi4, phi5 = 0;
@@ -109,6 +110,7 @@ public class Triangles {
             }
             phi += 360 / points_phi;
         }
+        normalsVec = normals;
         return arrayPositions;
     }
 
