@@ -28,18 +28,50 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
     };*/
 
     private float VPositions1[];
-    private float VPositions2[]= {-0.2f, -0.2f, 0.0f, 0,    -0.2f, 0.0f, 0,    0f,   0.0f};
+//    private float VPositions2[]= {-0.2f, -0.2f, 0.0f, 0,    -0.2f, 0.0f, 0,    0f,   0.0f};
     private int program;
     private GLCanvas Canvas;
     private float x=0f;
     private float y=0f;
     private float z=0f;
-    private float q = 1;
-    private float w = 1;
-    private float r = 1;
+
+    private float xP = 0.7f;
+    private float yP = 0.7f;
+    private float zP = 0f;
+
+    private float xS = 0.3f;
+    private float yS = 0.3f;
+    private float zS = 0f;
+    private float xSS = 0.7f;
+    private float ySS = 0.7f;
+    private float zSS = 0f;
+
+    private float q = 0.3f;
+    private float w = 0.3f;
+    private float r = 0.3f;
+
+    private float qP = 0.2f;
+    private float wP = 0.2f;
+    private float rP = 0.2f;
+
+    private float qS = 0.1f;
+    private float wS = 0.1f;
+    private float rS = 0.1f;
+
+
     float phi;
     float phi1;
     float phi2;
+    float phiP;
+    float DphiP = 0.1f;
+
+    float phiPP;
+    float DphiPP = 0.1f;
+
+    float phiS;
+    float DphiS = 0.1f;
+    float phiSS;
+    float DphiSS = 0.1f;
 
     public GLFrame4() {
         Canvas=new GLCanvas();
@@ -47,7 +79,7 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         Canvas.addGLEventListener(this);
         Canvas.setFocusable(false);
         addKeyListener(this);
-        setSize(500,500);
+        setSize(1000,1000);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setVisible(true);
@@ -109,14 +141,12 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         FloatBuffer bkg= Buffers.newDirectFloatBuffer(Col);
         gl.glClearBufferfv(GL_COLOR, 0, bkg);
 
-        float  [] B = Matrix.rotate(phi, phi1, phi2, 0.3f, 0.3f, 0f);
-
+        //Звезда
+        //float  [] B = Matrix.rotate(phi, phi1, phi2, 0.3f, 0.3f, 0f);
         float  [] X = Matrix.zooming(q, w, r);
-        float  [] F = Matrix.moving(x, y, z);
+        //float  [] F = Matrix.moving(x, y, z);
 
-        float  [] model =
-                Matrix.matrix(
-                        Matrix.matrix(X, B), F);
+        float  [] model = X;
 
         float []A=new float[] {1f,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};//одинична матриця
 
@@ -151,16 +181,50 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
 
         gl.glDrawArrays(GL_TRIANGLES, 0, VPositions1.length / 3);//постановка у чергу на рисування 3 вершин з АКТИВНОГО буфера vbo[0]
 
-//активація буфера		
-        gl.glBindBuffer(GL_ARRAY_BUFFER,  vbo[1]); //активізація буфера vbo[1]
-        gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-        gl.glEnableVertexAttribArray(0); //layout (location=0) -- 0 - номер змінної у шейдері, яка приймає дані з буфера
+        //Планета Земля
+        float  [] XP = Matrix.zooming(qP, wP, rP);
+        float  [] BP = Matrix.rotate(0, 0, phiP, 0, 0, 0);
+        float  [] FP = Matrix.moving(xP, yP, zP);
+        float  [] BPP = Matrix.rotate(0, 0, phiPP, 0, 0, 0);
 
-//передача змінної у шейдер		
-        gl.glProgramUniform1f(program, X_location, 0);// записуємо 0 у шейдер змінну за посиланням X_location. Посилання на змінну вже отримали раніше
-        //gl.glDisable(GL_DEPTH_TEST);//відключення Z-буферизації
+        float  [] modelP = Matrix.matrix(Matrix.matrix(Matrix.matrix(BPP, FP), BP), XP);
 
-        gl.glDrawArrays(GL_TRIANGLES, 0, 3); //постановка у чергу на рисування 3 вершин з активного буфера vbo[1]
+        int matModel_locationP=gl.glGetUniformLocation(program, "model"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matModel_locationP, 1, true, modelP, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
+
+        gl.glDrawArrays(GL_TRIANGLES, 0, VPositions1.length / 3);//постановка у чергу на рисування 3 вершин з АКТИВНОГО буфера vbo[0]
+
+        //Спутник-Луна
+        float  [] XS = Matrix.zooming(qS, wS, rS);
+        float  [] BS = Matrix.rotate(0, 0, phiS, 0, 0, 0);
+        float  [] FS = Matrix.moving(xS, yS, zS);
+        float  [] BSS = Matrix.rotate(0, 0, phiSS, 0, 0, 0);
+        float  [] FSS = Matrix.moving(xSS, ySS, zSS);
+        float  [] BSSS = Matrix.rotate(0, 0, phiPP, 0, 0, 0);
+
+        float  [] modelS = Matrix.matrix(BSSS,
+                Matrix.matrix(FSS,
+                        Matrix.matrix(BSS,
+                                Matrix.matrix(FS,
+                                        Matrix.matrix(BS, XS)))));
+
+        int matModel_locationS=gl.glGetUniformLocation(program, "model"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matModel_locationS, 1, true, modelS, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
+
+        gl.glDrawArrays(GL_TRIANGLES, 0, VPositions1.length / 3);//постановка у чергу на рисування 3 вершин з АКТИВНОГО буфера vbo[0]
+
+
+
+////активація буфера
+//        gl.glBindBuffer(GL_ARRAY_BUFFER,  vbo[1]); //активізація буфера vbo[1]
+//        gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+//        gl.glEnableVertexAttribArray(0); //layout (location=0) -- 0 - номер змінної у шейдері, яка приймає дані з буфера
+//
+////передача змінної у шейдер
+//        gl.glProgramUniform1f(program, X_location, 0);// записуємо 0 у шейдер змінну за посиланням X_location. Посилання на змінну вже отримали раніше
+//        //gl.glDisable(GL_DEPTH_TEST);//відключення Z-буферизації
+//
+//        gl.glDrawArrays(GL_TRIANGLES, 0, 3); //постановка у чергу на рисування 3 вершин з активного буфера vbo[1]
     }
 
     @Override
@@ -183,9 +247,9 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         FloatBuffer f= Buffers.newDirectFloatBuffer(VPositions1);
         gl.glBufferData(GL_ARRAY_BUFFER, f.limit()*4, f, GL_STATIC_DRAW);//записуємо у АКТИВНИЙ буфер vbo[0]
 
-        gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);// 1-й буфер АКТИВНИЙ vbo[1]
-        FloatBuffer f2=Buffers.newDirectFloatBuffer(VPositions2);
-        gl.glBufferData(GL_ARRAY_BUFFER, f2.limit()*4, f2,GL_STATIC_DRAW);//записуємо у АКТИВНИЙ буфер vbo[1]
+//        gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);// 1-й буфер АКТИВНИЙ vbo[1]
+//        FloatBuffer f2=Buffers.newDirectFloatBuffer(VPositions2);
+//        gl.glBufferData(GL_ARRAY_BUFFER, f2.limit()*4, f2,GL_STATIC_DRAW);//записуємо у АКТИВНИЙ буфер vbo[1]
 
     }
 
@@ -206,60 +270,68 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         if(e.getKeyCode()==KeyEvent.VK_ESCAPE) {
             System.exit(1);
         }
-        if(e.getKeyCode()==KeyEvent.VK_I) {
-            x=x-0.05f;
+
+        if(e.getKeyCode()==KeyEvent.VK_SPACE) {
+            DphiP += 0.1f;
+            DphiPP += 0.1f;
+            DphiS += 0.1f;
+            DphiSS += 0.1f;
+
         }
-        if(e.getKeyCode()==KeyEvent.VK_O) {
-            x=x+0.05f;
-        }
-        if(e.getKeyCode()==KeyEvent.VK_K) {
-            y=y-0.05f;
-        }
-        if(e.getKeyCode()==KeyEvent.VK_L) {
-            y=y+0.05f;
-        }
-        if(e.getKeyCode()==KeyEvent.VK_P) {
-            z=z-0.05f;
-        }
-        if(e.getKeyCode()==KeyEvent.VK_U) {
-            z=z+0.05f;
-        }
-        if(e.getKeyCode()==KeyEvent.VK_A) {
-            phi+=1;
-        }
-        if(e.getKeyCode()==KeyEvent.VK_D) {
-            phi-=1;
-        }
-        if(e.getKeyCode()==KeyEvent.VK_Z) {
-            phi1+=1;
-        }
-        if(e.getKeyCode()==KeyEvent.VK_X) {
-            phi1-=1;
-        }
-        if(e.getKeyCode()==KeyEvent.VK_C) {
-            phi2+=1;
-        }
-        if(e.getKeyCode()==KeyEvent.VK_V) {
-            phi2-=1;
-        }
-        if(e.getKeyCode()==KeyEvent.VK_T) {
-            q+=0.1;
-        }
-        if(e.getKeyCode()==KeyEvent.VK_Y) {
-            q-=0.1;
-        }
-        if(e.getKeyCode()==KeyEvent.VK_G) {
-            w+=0.1;
-        }
-        if(e.getKeyCode()==KeyEvent.VK_H) {
-            w-=0.1;
-        }
-        if(e.getKeyCode()==KeyEvent.VK_B) {
-            r+=0.1;
-        }
-        if(e.getKeyCode()==KeyEvent.VK_N) {
-            r-=0.1;
-        }
+//        if(e.getKeyCode()==KeyEvent.VK_I) {
+//            x=x-0.05f;
+//        }
+//        if(e.getKeyCode()==KeyEvent.VK_O) {
+//            x=x+0.05f;
+//        }
+//        if(e.getKeyCode()==KeyEvent.VK_K) {
+//            y=y-0.05f;
+//        }
+//        if(e.getKeyCode()==KeyEvent.VK_L) {
+//            y=y+0.05f;
+//        }
+//        if(e.getKeyCode()==KeyEvent.VK_P) {
+//            z=z-0.05f;
+//        }
+//        if(e.getKeyCode()==KeyEvent.VK_U) {
+//            z=z+0.05f;
+//        }
+//        if(e.getKeyCode()==KeyEvent.VK_A) {
+//            phi+=1;
+//        }
+//        if(e.getKeyCode()==KeyEvent.VK_D) {
+//            phi-=1;
+//        }
+//        if(e.getKeyCode()==KeyEvent.VK_Z) {
+//            phi1+=1;
+//        }
+//        if(e.getKeyCode()==KeyEvent.VK_X) {
+//            phi1-=1;
+//        }
+//        if(e.getKeyCode()==KeyEvent.VK_C) {
+//            phi2+=1;
+//        }
+//        if(e.getKeyCode()==KeyEvent.VK_V) {
+//            phi2-=1;
+//        }
+//        if(e.getKeyCode()==KeyEvent.VK_T) {
+//            q+=0.1;
+//        }
+//        if(e.getKeyCode()==KeyEvent.VK_Y) {
+//            q-=0.1;
+//        }
+//        if(e.getKeyCode()==KeyEvent.VK_G) {
+//            w+=0.1;
+//        }
+//        if(e.getKeyCode()==KeyEvent.VK_H) {
+//            w-=0.1;
+//        }
+//        if(e.getKeyCode()==KeyEvent.VK_B) {
+//            r+=0.1;
+//        }
+//        if(e.getKeyCode()==KeyEvent.VK_N) {
+//            r-=0.1;
+//        }
 
 
 
