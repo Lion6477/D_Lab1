@@ -19,31 +19,38 @@ import static com.jogamp.opengl.GL4.*;// для GL_COLOR
 public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
     private int[] vbo=new int[3];
     private int[] vao=new int[1];
-    //private float VPositions1[]= {0.2f, 0.2f,   0f,   0.2f,	0.5f,  0f,   0.5f, 0.1f, 0f};
-    //                            X1    Y1      Z1    X2    Y2     Z2    X3    Y3    Z3
-    /*private float VPositions1[]= {0.3f,   0.3f,   0f,   0.3f,   0.8f,   0f,     0.8f,   0.3f,    0f,
-                                  0.3f,   0.3f,   0f,   0.3f,   0.8f,   0f,     0.6f,   0.4f,    0.8f,
-                                  0.3f,   0.3f,   0f,   0.6f,   0.4f,   0.8f,   0.8f,   0.3f,    0f,
-                                  0.3f,   0.8f,   0f,   0.8f,   0.3f,   0f,     0.6f,    0.4f,   0.8f
-    };*/
     private float[] VPositions1;
-//    private float[] VPositions2= {-0.2f, -0.2f, 0.0f, 0,    -0.2f, 0.0f, 0,    0f,   0.0f};
-    private int program, textureLink, textureLink1, textureLink2;
+    private int program, textureLink, textureLinkMercury, textureLinkVenus, textureLinkEarth, textureLinkMars, textureLinkJupiter, textureLinkSaturn, textureLinkUranus;//Текстуры планет
+    private int textureLinkMoon;
     private GLCanvas Canvas;
-    private final float x=0f, y=0f, z=0f;
-    private final float xP = 0.7f, yP = 0.7f, zP = 0f;
-    private final float xS = 0.3f, yS = 0.3f, zS = 0f;
-    private final float q = 0.3f, w = 0.3f, r = 0.3f;
-    private final float qP = 0.2f, wP = 0.2f, rP = 0.2f;
-    private final float qS = 0.1f, wS = 0.1f, rS = 0.1f;
+    private final float x=0f, y=0f, z=0f;//Координаты звезды
+    private final float q = 0.15f, w = 0.15f, r = 0.15f;//Размер звезды
+    private final float xMercury = 0.12f, yMercury = 0.12f, zMercury = 0f;//Координаты Mercury
+    private final float qMercury = 0.015f, wMercury = 0.015f, rMercury = 0.015f;//Размер Mercury
+    private final float xVenus = 0.23f, yVenus = 0.23f, zVenus = 0f;//Координаты Venus
+    private final float qVenus = 0.013f, wVenus = 0.013f, rVenus = 0.013f;//Размер Venus
+    private final float xEarth = 0.32f, yEarth = 0.32f, zEarth = 0f;//Координаты Earth
+    private final float qEarth = 0.013f, wEarth = 0.013f, rEarth = 0.013f;//Размер Earth
+    private final float xMars = 0.5f, yMars = 0.5f, zMars = 0f;//Координаты Mars
+    private final float qMars = 0.0073f, wMars = 0.0073f, rMars = 0.0073f;//Размер Mars
+    private final float xJupiter = 0.17f, yJupiter = 0.17f, zJupiter = 0f;//Координаты Jupiter
+    private final float qJupiter = 0.015f, wJupiter = 0.015f, rJupiter = 0.015f;//Размер Jupiter
+    private final float xSaturn = 0.31f, ySaturn = 0.31f, zSaturn = 0f;//Координаты Saturn
+    private final float qSaturn = 0.012f, wSaturn = 0.012f, rSaturn = 0.012f;//Размер Saturn
+    private final float xUranus = 0.61f, yUranus = 0.61f, zUranus = 0f;//Координаты Uranus
+    private final float qUranus = 0.0054f, wUranus = 0.0054f, rUranus = 0.0054f;//Размер Uranus
+    private final float xMoon = 0.07f, yMoon = 0.07f, zMoon = 0f;//Координаты Moon
+    private final float qMoon = 0.0037f, wMoon = 0.0037f, rMoon = 0.0037f;//Размер Moon
+
+
     float phiP, phiPP, phiS, phiSS;
     public GLFrame4() {
-        Canvas=new GLCanvas();
+        Canvas = new GLCanvas();
         add(Canvas);
         Canvas.addGLEventListener(this);
         Canvas.setFocusable(false);
         addKeyListener(this);
-        setSize(1920,1080);
+        setSize(1000,1000);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setVisible(true);
@@ -132,14 +139,14 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         GL4 gl=(GL4) GLContext.getCurrentGL();
         gl.glClear(GL_DEPTH_BUFFER_BIT);
         float[] Col = {0.0f, 0.0f, 0.0f, 1f};
-        FloatBuffer bkg= Buffers.newDirectFloatBuffer(Col);
+        FloatBuffer bkg = Buffers.newDirectFloatBuffer(Col);
         gl.glClearBufferfv(GL_COLOR, 0, bkg);
         //активація буфера
         gl.glBindBuffer(GL_ARRAY_BUFFER,  vbo[2]); //активізація буфера vbo[2]
         gl.glVertexAttribPointer(2, 2, GL_FLOAT, false, 0, 0);
         gl.glEnableVertexAttribArray(2); //layout (location=0) -- 0 - номер змінної у шейдері, яка приймає дані з буфера
 
-        //Звезда
+        //TODO Звезда
         //активуємо texture unit No0 і зв’язуємо з texture object
         gl.glActiveTexture(GL_TEXTURE0);// номер текстури = 0, кількість -обмежена
         gl.glBindTexture(GL_TEXTURE_2D, textureLink);
@@ -179,44 +186,170 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         //gl.glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         gl.glDrawArrays(GL_TRIANGLES, 0, VPositions1.length / 3);//постановка у чергу на рисування 3 вершин з АКТИВНОГО буфера vbo[0]
 
-        //Планета Земля
+        //TODO Планета Mercury
         //активуємо texture unit No0 і зв’язуємо з texture object
         gl.glActiveTexture(GL_TEXTURE0);// номер текстури = 0, кількість -обмежена
-        gl.glBindTexture(GL_TEXTURE_2D, textureLink1);
+        gl.glBindTexture(GL_TEXTURE_2D, textureLinkMercury);
 
-        float  [] XP = Matrix.zooming(qP, wP, rP);
-        float  [] BP = Matrix.rotate(0, 0, phiP, 0, 0, 0);
-        float  [] FP = Matrix.moving(xP, yP, zP);
-        float  [] BPP = Matrix.rotate(0, 0, phiPP, 0, 0, 0);
+        float  [] XPMercury = Matrix.zooming(qMercury, wMercury, rMercury);
+        float  [] BPMercury = Matrix.rotate(0, 0, phiP, 0, 0, 0);
+        float  [] FPMercury = Matrix.moving(xMercury, yMercury, zMercury);
+        float  [] BPPMercury = Matrix.rotate(0, 0, phiPP, 0, 0, 0);
 
-        float  [] modelP = Matrix.matrix(Matrix.matrix(Matrix.matrix(BPP, FP), BP), XP);
-        normalMat = Matrix.inverse(modelP);
+        float  [] modelPMercury = Matrix.matrix(Matrix.matrix(Matrix.matrix(BPPMercury, FPMercury), BPMercury), XPMercury);
+        normalMat = Matrix.inverse(modelPMercury);
 
-        matNormal_location=gl.glGetUniformLocation(program, "normalMat"); //посилання на положення матриці matA у шейдері
+        matNormal_location = gl.glGetUniformLocation(program, "normalMat"); //посилання на положення матриці matA у шейдері
         gl.glUniformMatrix4fv(matNormal_location, 1, false, normalMat, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
 
-        int matModel_locationP=gl.glGetUniformLocation(program, "model"); //посилання на положення матриці matA у шейдері
-        gl.glUniformMatrix4fv(matModel_locationP, 1, true, modelP, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
+        int matModel_locationPMercury=gl.glGetUniformLocation(program, "model"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matModel_locationPMercury, 1, true, modelPMercury, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
 
         gl.glDrawArrays(GL_TRIANGLES, 0, VPositions1.length / 3);//постановка у чергу на рисування 3 вершин з АКТИВНОГО буфера vbo[0]
 
-        //Спутник-Луна
+        //TODO Планета Venus
         //активуємо texture unit No0 і зв’язуємо з texture object
         gl.glActiveTexture(GL_TEXTURE0);// номер текстури = 0, кількість -обмежена
-        gl.glBindTexture(GL_TEXTURE_2D, textureLink2);
-        float  [] XS = Matrix.zooming(qS, wS, rS);
-        float  [] BS = Matrix.rotate(0, 0, phiS, 0, 0, 0);
-        float  [] FS = Matrix.moving(xS, yS, zS);
-        float  [] BSS = Matrix.rotate(0, 0, phiSS, 0, 0, 0);
+        gl.glBindTexture(GL_TEXTURE_2D, textureLinkVenus);
+
+        float  [] XPVenus = Matrix.zooming(qVenus, wVenus, rVenus);
+        float  [] BPVenus = Matrix.rotate(0, 0, phiP, 0, 0, 0);
+        float  [] FPVenus = Matrix.moving(xVenus, yVenus, zVenus);
+        float  [] BPPVenus = Matrix.rotate(0, 0, phiPP, 0, 0, 0);
+
+        float  [] modelPVenus = Matrix.matrix(Matrix.matrix(Matrix.matrix(BPPVenus, FPVenus), BPVenus), XPVenus);
+        normalMat = Matrix.inverse(modelPVenus);
+
+        matNormal_location = gl.glGetUniformLocation(program, "normalMat"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matNormal_location, 1, false, normalMat, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
+
+        int matModel_locationPVenus=gl.glGetUniformLocation(program, "model"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matModel_locationPVenus, 1, true, modelPVenus, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
+
+        gl.glDrawArrays(GL_TRIANGLES, 0, VPositions1.length / 3);//постановка у чергу на рисування 3 вершин з АКТИВНОГО буфера vbo[0]
+
+        //TODO Планета Земля
+        //активуємо texture unit No0 і зв’язуємо з texture object
+        gl.glActiveTexture(GL_TEXTURE0);// номер текстури = 0, кількість -обмежена
+        gl.glBindTexture(GL_TEXTURE_2D, textureLinkEarth);
+
+        float  [] XPEarth = Matrix.zooming(qEarth, wEarth, rEarth);
+        float  [] BPEarth = Matrix.rotate(0, 0, phiP, 0, 0, 0);
+        float  [] FPEarth = Matrix.moving(xEarth, yEarth, zEarth);
+        float  [] BPPEarth = Matrix.rotate(0, 0, phiPP, 0, 0, 0);
+
+        float  [] modelPEarth = Matrix.matrix(Matrix.matrix(Matrix.matrix(BPPEarth, FPEarth), BPEarth), XPEarth);
+        normalMat = Matrix.inverse(modelPEarth);
+
+        matNormal_location = gl.glGetUniformLocation(program, "normalMat"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matNormal_location, 1, false, normalMat, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
+
+        int matModel_locationPEarth = gl.glGetUniformLocation(program, "model"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matModel_locationPEarth, 1, true, modelPEarth, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
+
+        gl.glDrawArrays(GL_TRIANGLES, 0, VPositions1.length / 3);//постановка у чергу на рисування 3 вершин з АКТИВНОГО буфера vbo[0]
+
+        //TODO Планета Mars
+        //активуємо texture unit No0 і зв’язуємо з texture object
+        gl.glActiveTexture(GL_TEXTURE0);// номер текстури = 0, кількість -обмежена
+        gl.glBindTexture(GL_TEXTURE_2D, textureLinkMars);
+
+        float  [] XPMars = Matrix.zooming(qMars, wMars, rMars);
+        float  [] BPMars = Matrix.rotate(0, 0, phiP, 0, 0, 0);
+        float  [] FPMars = Matrix.moving(xMars, yMars, zMars);
+        float  [] BPPMars = Matrix.rotate(0, 0, phiPP, 0, 0, 0);
+
+        float  [] modelPMars = Matrix.matrix(Matrix.matrix(Matrix.matrix(BPPMars, FPMars), BPMars), XPMars);
+        normalMat = Matrix.inverse(modelPMars);
+
+        matNormal_location = gl.glGetUniformLocation(program, "normalMat"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matNormal_location, 1, false, normalMat, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
+
+        int matModel_locationPMars=gl.glGetUniformLocation(program, "model"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matModel_locationPMars, 1, true, modelPMars, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
+
+        gl.glDrawArrays(GL_TRIANGLES, 0, VPositions1.length / 3);//постановка у чергу на рисування 3 вершин з АКТИВНОГО буфера vbo[0]
+
+        //TODO Планета Jupiter
+        //активуємо texture unit No0 і зв’язуємо з texture object
+        gl.glActiveTexture(GL_TEXTURE0);// номер текстури = 0, кількість -обмежена
+        gl.glBindTexture(GL_TEXTURE_2D, textureLinkJupiter);
+
+        float  [] XPJupiter = Matrix.zooming(qJupiter, wJupiter, rJupiter);
+        float  [] BPJupiter = Matrix.rotate(0, 0, phiP, 0, 0, 0);
+        float  [] FPJupiter = Matrix.moving(xJupiter, yJupiter, zJupiter);
+        float  [] BPPJupiter = Matrix.rotate(0, 0, phiPP, 0, 0, 0);
+
+        float  [] modelPJupiter = Matrix.matrix(Matrix.matrix(Matrix.matrix(BPPJupiter, FPJupiter), BPJupiter), XPJupiter);
+        normalMat = Matrix.inverse(modelPJupiter);
+
+        matNormal_location = gl.glGetUniformLocation(program, "normalMat"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matNormal_location, 1, false, normalMat, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
+
+        int matModel_locationPJupiter=gl.glGetUniformLocation(program, "model"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matModel_locationPJupiter, 1, true, modelPJupiter, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
+
+        gl.glDrawArrays(GL_TRIANGLES, 0, VPositions1.length / 3);//постановка у чергу на рисування 3 вершин з АКТИВНОГО буфера vbo[0]
+
+        //TODO Планета Saturn
+        //активуємо texture unit No0 і зв’язуємо з texture object
+        gl.glActiveTexture(GL_TEXTURE0);// номер текстури = 0, кількість -обмежена
+        gl.glBindTexture(GL_TEXTURE_2D, textureLinkSaturn);
+
+        float  [] XPSaturn = Matrix.zooming(qSaturn, wSaturn, rSaturn);
+        float  [] BPSaturn = Matrix.rotate(0, 0, phiP, 0, 0, 0);
+        float  [] FPSaturn = Matrix.moving(xSaturn, ySaturn, zSaturn);
+        float  [] BPPSaturn = Matrix.rotate(0, 0, phiPP, 0, 0, 0);
+
+        float  [] modelPSaturn = Matrix.matrix(Matrix.matrix(Matrix.matrix(BPPSaturn, FPSaturn), BPSaturn), XPSaturn);
+        normalMat = Matrix.inverse(modelPSaturn);
+
+        matNormal_location = gl.glGetUniformLocation(program, "normalMat"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matNormal_location, 1, false, normalMat, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
+
+        int matModel_locationPSaturn=gl.glGetUniformLocation(program, "model"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matModel_locationPSaturn, 1, true, modelPSaturn, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
+
+        gl.glDrawArrays(GL_TRIANGLES, 0, VPositions1.length / 3);//постановка у чергу на рисування 3 вершин з АКТИВНОГО буфера vbo[0]
+
+        //TODO Планета Uranus
+        //активуємо texture unit No0 і зв’язуємо з texture object
+        gl.glActiveTexture(GL_TEXTURE0);// номер текстури = 0, кількість -обмежена
+        gl.glBindTexture(GL_TEXTURE_2D, textureLinkUranus);
+
+        float  [] XPUranus = Matrix.zooming(qUranus, wUranus, rUranus);
+        float  [] BPUranus = Matrix.rotate(0, 0, phiP, 0, 0, 0);
+        float  [] FPUranus = Matrix.moving(xUranus, yUranus, zUranus);
+        float  [] BPPUranus = Matrix.rotate(0, 0, phiPP, 0, 0, 0);
+
+        float  [] modelPUranus = Matrix.matrix(Matrix.matrix(Matrix.matrix(BPPUranus, FPUranus), BPUranus), XPUranus);
+        normalMat = Matrix.inverse(modelPUranus);
+
+        matNormal_location = gl.glGetUniformLocation(program, "normalMat"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matNormal_location, 1, false, normalMat, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
+
+        int matModel_locationPUranus=gl.glGetUniformLocation(program, "model"); //посилання на положення матриці matA у шейдері
+        gl.glUniformMatrix4fv(matModel_locationPUranus, 1, true, modelPUranus, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
+
+        gl.glDrawArrays(GL_TRIANGLES, 0, VPositions1.length / 3);//постановка у чергу на рисування 3 вершин з АКТИВНОГО буфера vbo[0]
+
+        //TODO Спутник-Луна
+        //активуємо texture unit No0 і зв’язуємо з texture object
+        gl.glActiveTexture(GL_TEXTURE0);// номер текстури = 0, кількість -обмежена
+        gl.glBindTexture(GL_TEXTURE_2D, textureLinkMoon);
+        float  [] XMoon = Matrix.zooming(qMoon, wMoon, rMoon);
+        float  [] BMoon = Matrix.rotate(0, 0, phiS, 0, 0, 0);
+        float  [] FMoon = Matrix.moving(xMoon, yMoon, zMoon);
+        float  [] BMoonMoon = Matrix.rotate(0, 0, phiSS, 0, 0, 0);
 
 //        float  [] FSS = Matrix.moving(xSS, ySS, zSS);
 //        float  [] BSSS = Matrix.rotate(0, 0, phiPP, 0, 0, 0);
 
-        float  [] modelS = Matrix.matrix(BPP,
-                Matrix.matrix(FP,
-                        Matrix.matrix(BSS,
-                                Matrix.matrix(FS,
-                                        Matrix.matrix(BS, XS)))));
+        float  [] modelS = Matrix.matrix(BPPEarth,
+                Matrix.matrix(FPEarth,
+                        Matrix.matrix(BMoonMoon,
+                                Matrix.matrix(FMoon,
+                                        Matrix.matrix(BMoon, XMoon)))));
         normalMat = Matrix.inverse(modelS);
         matNormal_location=gl.glGetUniformLocation(program, "normalMat"); //посилання на положення матриці matA у шейдері
         gl.glUniformMatrix4fv(matNormal_location, 1, false, normalMat, 0);//передача матриці A за посиланням matA_location у кількості 1, без транспонування
@@ -237,21 +370,26 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
 //
 //        gl.glDrawArrays(GL_TRIANGLES, 0, 3); //постановка у чергу на рисування 3 вершин з активного буфера vbo[1]
     }
-
     @Override
     public void dispose(GLAutoDrawable arg0) {
         // TODO Auto-generated method stub
 
     }
-
     @Override
     public void init(GLAutoDrawable arg0) {
         Polygons sphere = new Polygons();
         Textures texters = new Textures();
         VPositions1 = sphere.sphere();
         textureLink = texters.loadTexture("SunTexture.jpg");
-        textureLink1 = texters.loadTexture("EarthTexture.jpg");
-        textureLink2 = texters.loadTexture("MoonTexture.jpg");
+        textureLinkMercury = texters.loadTexture("Mercury.jpg");
+        textureLinkVenus = texters.loadTexture("Venus.jpg");
+        textureLinkEarth = texters.loadTexture("EarthTexture.jpg");
+        textureLinkMars = texters.loadTexture("Mars.jpg");
+        textureLinkJupiter = texters.loadTexture("Jupiter.jpg");
+        textureLinkSaturn = texters.loadTexture("Saturn.jpg");
+        textureLinkUranus = texters.loadTexture("Uranus.jpg");
+
+        textureLinkMoon = texters.loadTexture("MoonTexture.jpg");
 
         GL4 gl=(GL4) GLContext.getCurrentGL();
         program=MakeProgram();
@@ -271,19 +409,16 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         gl.glBufferData(GL_ARRAY_BUFFER, f3.limit()*4, f3,GL_STATIC_DRAW);//записуємо у АКТИВНИЙ буфер vbo[2]
 
     }
-
     @Override
     public void reshape(GLAutoDrawable arg0, int arg1, int arg2, int arg3, int arg4) {
         // TODO Auto-generated method stub
 
     }
-
     @Override
     public void keyTyped(KeyEvent e) {
         // TODO Auto-generated method stub
 
     }
-
     @Override
     public void keyPressed(KeyEvent e) {
         if(e.getKeyCode()==KeyEvent.VK_ESCAPE) {
@@ -298,7 +433,6 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         }
         Canvas.display();
     }
-
     @Override
     public void keyReleased(KeyEvent e) {
         // TODO Auto-generated method stub

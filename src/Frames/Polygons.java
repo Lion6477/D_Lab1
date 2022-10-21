@@ -3,16 +3,16 @@ package Frames;
 public class Polygons {
     float[] normalsVec, textXY;
     public float[] sphere(){
-        int points_phi  = 30, points_teta = 30;
+        float points_phi  = 600f, points_teta = 600f;
         float x, y, z, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5;
         float X, Y, X1, Y1, X2, Y2, X3, Y3,  X4, Y4,  X5, Y5;
         float r = 1;
         float X_1 = points_phi, Y_1 = points_teta;
         float phi = 0f, phi1 = 0f, teta = 0f, teta1 = 0f;
 
-        int sphereArrayPositionsLength = (points_phi) * (points_teta) * 6 * 3;
-        int sphereArrayNormalsLength = (points_phi) * (points_teta) * 6 * 3;
-        int sphereArrayTexturesLength = (points_phi) * (points_teta) * 6 * 2;
+        int sphereArrayPositionsLength = (int) ((points_phi) * (points_teta) * 6 * 3);
+        int sphereArrayNormalsLength = (int) ((points_phi) * (points_teta) * 6 * 3);
+        int sphereArrayTexturesLength = (int) ((points_phi) * (points_teta) * 6 * 2);
         float[] arrayPositions = new float[sphereArrayPositionsLength];
         float[] arrayNormals = new float[sphereArrayNormalsLength];
         float[] arrayTextures = new float[sphereArrayTexturesLength];
