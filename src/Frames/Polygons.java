@@ -3,7 +3,7 @@ package Frames;
 public class Polygons {
     float[] normalsVec, textXY;
     public float[] sphere(){
-        float points_phi  = 600f, points_teta = 600f;
+        float points_phi  = 30f, points_teta = 30f;
         float x, y, z, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5;
         float X, Y, X1, Y1, X2, Y2, X3, Y3,  X4, Y4,  X5, Y5;
         float r = 1;
@@ -39,7 +39,7 @@ public class Polygons {
 
                 teta1 = teta + 180f / points_teta;
 
-                X2 = X1;
+                X2 = X;
                 Y2 = (j + 1)/Y_1;
                 x2 = r * (float) Math.cos(Math.toRadians(phi)) * (float) Math.sin(Math.toRadians(teta1));
                 y2 = r * (float) Math.sin(Math.toRadians(phi)) * (float) Math.sin(Math.toRadians(teta1));

@@ -94,7 +94,7 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
 
                         //+ "gl_Position=matA*vec4(pos, 1);"// множення матриці на вектор. Дія "*" перевизначена у GLSL
                         + "gl_Position = model * vec4(pos, 1);"
-                        + "vecT = vec3(0, 0, 0) - gl_Position.xyz;"
+                        + "vecT = normalize(vec3(0, 0, 0) - gl_Position.xyz);"
                         + "vecTemp = normalMat * vec4(normal, 1);"
                         + "normalVec = normalize(vecTemp.xyz);"
                         + "light_Diffuse = light_intens * max(dot(normalVec, vecT), 0);"
