@@ -1,26 +1,24 @@
 package Frames;
 
-public class Triangles {
-    float normalsVec[];
-    float textXY[];
-    int points_phi  = 30;
-    int points_teta = 30;
-    float X_1 = points_phi, Y_1 = points_teta;
-    float phi = 0, phi1 = 0;
-    float teta = 0, teta1 = 0;
-    float x, y, z, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5;
-    float X, Y, X1, Y1, X2, Y2, X3, Y3,  X4, Y4,  X5, Y5;
-    float r = 1;
-
-
+public class Polygons {
+    float[] normalsVec, textXY;
     public float[] sphere(){
-        float arrayPositions[] = new float[(points_phi) * (points_teta) * 6 * 3];
-        float normals[] = new float[(points_phi) * (points_teta) * 6 * 3];
-        float textures[] = new float[(points_phi) * (points_teta) * 6 * 2];
+        int points_phi  = 30, points_teta = 30;
+        float x, y, z, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, x5, y5, z5;
+        float X, Y, X1, Y1, X2, Y2, X3, Y3,  X4, Y4,  X5, Y5;
+        float r = 1;
+        float X_1 = points_phi, Y_1 = points_teta;
+        float phi = 0f, phi1 = 0f, teta = 0f, teta1 = 0f;
 
-        int k = 0;
-        int l = 0;
-        float len = 0;
+        int sphereArrayPositionsLength = (points_phi) * (points_teta) * 6 * 3;
+        int sphereArrayNormalsLength = (points_phi) * (points_teta) * 6 * 3;
+        int sphereArrayTexturesLength = (points_phi) * (points_teta) * 6 * 2;
+        float[] arrayPositions = new float[sphereArrayPositionsLength];
+        float[] arrayNormals = new float[sphereArrayNormalsLength];
+        float[] arrayTextures = new float[sphereArrayTexturesLength];
+
+        int k = 0, l = 0;
+        float len;
         for(int i = 0; i < points_phi; i++){
             teta = 0;
             for(int j = 0; j < points_teta; j++){
@@ -31,7 +29,7 @@ public class Triangles {
                 y = r * (float) Math.sin(Math.toRadians(phi)) * (float) Math.sin(Math.toRadians(teta));
                 z = r * (float) Math.cos(Math.toRadians(teta));
 
-                phi1 = phi + 360 / points_phi;
+                phi1 = phi + 360f / points_phi;
 
                 X1 = (i + 1)/X_1;
                 Y1 = j/Y_1;
@@ -39,7 +37,7 @@ public class Triangles {
                 y1 = r * (float) Math.sin(Math.toRadians(phi1)) * (float) Math.sin(Math.toRadians(teta));
                 z1 = r * (float) Math.cos(Math.toRadians(teta));
 
-                teta1 = teta + 180/points_teta;
+                teta1 = teta + 180f / points_teta;
 
                 X2 = X1;
                 Y2 = (j + 1)/Y_1;
@@ -65,98 +63,98 @@ public class Triangles {
                 y5 = y2;
                 z5 = z2;
 
-                teta += 180/points_teta;
+                teta += 180f / points_teta;
 
                 arrayPositions[k] = x;
                 len = (float) Math.sqrt(x * x + y * y + z * z);
-                normals[k] = x/len;
-                textures[l] = X;
+                arrayNormals[k] = x/len;
+                arrayTextures[l] = X;
                 l+=1;
                 k += 1;
                 arrayPositions[k] = y;
-                normals[k] = y/len;
-                textures[l] = Y;
+                arrayNormals[k] = y/len;
+                arrayTextures[l] = Y;
                 l+=1;
                 k += 1;
                 arrayPositions[k] = z;
-                normals[k] = z/len;
-                textures[l] = X1;
+                arrayNormals[k] = z/len;
+                arrayTextures[l] = X1;
                 l+=1;
                 k += 1;
                 arrayPositions[k] = x1;
                 len = (float) Math.sqrt(x1 * x1 + y1 * y1 + z1 * z1);
-                normals[k] = x1/len;
-                textures[l] = Y1;
+                arrayNormals[k] = x1/len;
+                arrayTextures[l] = Y1;
                 l+=1;
                 k += 1;
                 arrayPositions[k] = y1;
-                normals[k] = y1/len;
-                textures[l] = X2;
+                arrayNormals[k] = y1/len;
+                arrayTextures[l] = X2;
                 l+=1;
                 k += 1;
                 arrayPositions[k] = z1;
-                normals[k] = z1/len;
-                textures[l] = Y2;
+                arrayNormals[k] = z1/len;
+                arrayTextures[l] = Y2;
                 l+=1;
                 k += 1;
                 arrayPositions[k] = x2;
                 len = (float) Math.sqrt(x2 * x2 + y2 * y2 + z2 * z2);
-                normals[k] = x2/len;
-                textures[l] = X3;
+                arrayNormals[k] = x2/len;
+                arrayTextures[l] = X3;
                 l+=1;
                 k += 1;
                 arrayPositions[k] = y2;
-                normals[k] = y2/len;
-                textures[l] = Y3;
+                arrayNormals[k] = y2/len;
+                arrayTextures[l] = Y3;
                 l+=1;
                 k += 1;
                 arrayPositions[k] = z2;
-                normals[k] = z2/len;
-                textures[l] = X4;
+                arrayNormals[k] = z2/len;
+                arrayTextures[l] = X4;
                 l+=1;
                 k += 1;
                 arrayPositions[k] = x3;
                 len = (float) Math.sqrt(x3 * x3 + y3 * y3 + z3 * z3);
-                normals[k] = x3/len;
-                textures[l] = Y4;
+                arrayNormals[k] = x3/len;
+                arrayTextures[l] = Y4;
                 l+=1;
                 k += 1;
                 arrayPositions[k] = y3;
-                normals[k] =y3/len;
-                textures[l] = X5;
+                arrayNormals[k] =y3/len;
+                arrayTextures[l] = X5;
                 l+=1;
                 k += 1;
                 arrayPositions[k] = z3;
-                normals[k] = z3/len;
-                textures[l] = Y5;
+                arrayNormals[k] = z3/len;
+                arrayTextures[l] = Y5;
                 l+=1;
                 k += 1;
                 arrayPositions[k] = x4;
                 len = (float) Math.sqrt(x4 * x4 + y4 * y4 + z4 * z4);
-                normals[k] = x4/len;
+                arrayNormals[k] = x4/len;
                 k += 1;
                 arrayPositions[k] = y4;
-                normals[k] = y4/len;
+                arrayNormals[k] = y4/len;
                 k += 1;
                 arrayPositions[k] = z4;
-                normals[k] = z4/len;
+                arrayNormals[k] = z4/len;
                 k += 1;
                 arrayPositions[k] = x5;
                 len = (float) Math.sqrt(x5 * x5 + y5 * y5 + z5 * z5);
-                normals[k] = x5/len;
+                arrayNormals[k] = x5/len;
                 k += 1;
                 arrayPositions[k] = y5;
-                normals[k] = y5/len;
+                arrayNormals[k] = y5/len;
                 k += 1;
                 arrayPositions[k] = z5;
-                normals[k] = z5/len;
+                arrayNormals[k] = z5/len;
                 k += 1;
             }
-            phi += 360 / points_phi;
+            phi += 360f / points_phi;
         }
 
-        textXY = textures;
-        normalsVec = normals;
+        textXY = arrayTextures;
+        normalsVec = arrayNormals;
         return arrayPositions;
     }
 

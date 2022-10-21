@@ -6,7 +6,6 @@ class Matrix {
     public static float[] matrix(float[] matrix1, float[] matrix2){
         float result[] = new float[16];
     // l = 4 * i + j
-
         for(int i=0; i<4; i++){
             for(int j=0; j<4; j++){
                 for(int k=0; k<4; k++){
@@ -16,7 +15,6 @@ class Matrix {
         }
         return result;
     }
-
     static float [] Ox (float phi) {
         float [] A = new float[] {
                 1,  0,  0,  0,
@@ -35,7 +33,6 @@ class Matrix {
         };
         return B; //Тіло методу
     };
-
     static float [] Oz (float phi2) {
         float [] Z = new float[]{
                 (float) Math.cos(Math.toRadians(phi2)),  -(float) Math.sin(Math.toRadians(phi2)),  0,  0,
@@ -113,10 +110,8 @@ class Matrix {
                 }
             }
         }
-
         return res;
     }
-
     static public float[] inverseMat(float[] matrix){
         float [] matrixNew = new float[matrix.length];
         for(int i = 0; i < matrix.length - 1; i++){
