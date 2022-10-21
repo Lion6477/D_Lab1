@@ -117,6 +117,14 @@ class Matrix {
         return res;
     }
 
+    static public float[] inverseMat(float[] matrix){
+        float [] matrixNew = new float[matrix.length];
+        for(int i = 0; i < matrix.length - 1; i++){
+            matrixNew[i] = - matrix[i];
+        }
+        matrixNew[matrixNew.length -1] = 1;
+        return matrixNew;
+    }
     void outputArr(float [] A) {
         for(int i=0;i<A.length; i++) {
             System.out.println(A[i]);

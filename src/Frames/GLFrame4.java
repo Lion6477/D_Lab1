@@ -13,11 +13,12 @@ import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.awt.GLCanvas;
 
+import static Frames.Matrix.inverseMat;
 import static com.jogamp.opengl.GL.GL_DEPTH_TEST;
 import static com.jogamp.opengl.GL4.*;// для GL_COLOR
 
 public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
-    private int vbo[]=new int[2];
+    private int vbo[]=new int[3];
     private int vao[]=new int[1];
     //private float VPositions1[]= {0.2f, 0.2f,   0f,   0.2f,	0.5f,  0f,   0.5f, 0.1f, 0f};
     //                            X1    Y1      Z1    X2    Y2     Z2    X3    Y3    Z3
@@ -65,6 +66,7 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
 
     float phiS;
     float phiSS;
+    int textureLink;
 
 
     public GLFrame4() {
@@ -73,7 +75,7 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         Canvas.addGLEventListener(this);
         Canvas.setFocusable(false);
         addKeyListener(this);
-        setSize(1000,1000);
+        setSize(1920,1080);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setVisible(true);
@@ -86,6 +88,9 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
                 "#version 430\n",
                 "layout (location=0) in vec3 pos;"//змінна pos приймає дані з активного буфера
                 + "layout (location=1) in vec3 normal;"
+                        +"layout (location=2) in vec2 texturee;"
+                        +"layout (binding=0) uniform sampler2D samp;"
+
                         + "uniform mat4 model;" //matB -- матриця 4х4, яка передається з Java
                         + "uniform mat4 normalMat;"
 
@@ -94,7 +99,7 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
                         + "uniform float z;"
 
                         + "vec3 normalVec;"
-                        + "vec3 light;"
+                        + "out vec3 light;"
                         + "vec3 light_Ambient;"
                         + "vec3 material;"
                         + "vec3 light_Diffuse;"
@@ -103,13 +108,16 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
                         + "vec4 vecTemp;"
 
                         + "out vec4 varyingColor;"
+                        + "out vec2 helpingTc;"
 
                         + "void main(void){"
 
+                        + "helpingTc = texturee;"
                         + "light_Ambient = vec3(0.1, 0.1, 0.1);"
                         + "material = vec3(1, 0, 0);"
-                        + "light_Diffuse = vec3(0, 0, 0);"
+                        + "light_Diffuse = vec3(1, 1, 1);"
                         + "light_intens = vec3(1, 1, 1);"
+
 
 
                         //+ "gl_Position=matA*vec4(pos, 1);"// множення матриці на вектор. Дія "*" перевизначена у GLSL
@@ -120,7 +128,6 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
                         + "normalVec = normalize(vecTemp.xyz);"
                         + "light_Diffuse = light_intens * material * max(dot(normalVec, vecT), 0);"
                         + "light = light_Ambient + light_Diffuse;"
-
                         + "varyingColor=vec4(light * material, 1);"
                         //+ "varyingColor=vec4(1, 0, 0, 1);"
                         + "}\n"
@@ -128,9 +135,13 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
                 fSource[]= {
                         "#version 430\n",
                         "out vec4 Color;"
+                                +"layout (binding=0) uniform sampler2D samp;"
                                 + "in vec4 varyingColor;"
+                                + "in vec2 helpingTc;"
+                                + "in vec3 light;"
                                 + "void main(void){"
-                                + "Color=varyingColor;"
+                                + "Color = texture(samp, helpingTc) * vec4(light, 1);"
+//                                + "Color=varyingColor;"
                                 //+ "if(Color.b>0.5){discard;}"//якщо значення синього кольору >0.5, не рисувати
 
                                 + "}\n"
@@ -161,14 +172,23 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         gl.glClearBufferfv(GL_COLOR, 0, bkg);
 
 
+        //активація буфера
+        gl.glBindBuffer(GL_ARRAY_BUFFER,  vbo[2]); //активізація буфера vbo[2]
+        gl.glVertexAttribPointer(2, 2, GL_FLOAT, false, 0, 0);
+        gl.glEnableVertexAttribArray(2); //layout (location=0) -- 0 - номер змінної у шейдері, яка приймає дані з буфера
+
+        //активуємо texture unit No0 і зв’язуємо з texture object
+        gl.glActiveTexture(GL_TEXTURE0);// номер текстури = 0, кількість -обмежена
+        gl.glBindTexture(GL_TEXTURE_2D, textureLink);
 
         //Звезда
         //float  [] B = Matrix.rotate(phi, phi1, phi2, 0.3f, 0.3f, 0f);
         float  [] X = Matrix.zooming(q, w, r);
         //float  [] F = Matrix.moving(x, y, z);
 
-        float  [] model = X;
-        float [] normalMat = Matrix.inverse(model);
+        float [] model = X;
+        float [] modelInv = inverseMat(model);
+        float [] normalMat = Matrix.inverse(modelInv);
 
 //передача змінної у шейдер		
         int X_location=gl.glGetUniformLocation(program, "x"); // посилання на (положення) "x" у шейдері
@@ -251,6 +271,8 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         gl.glBindBuffer(GL_ARRAY_BUFFER,  vbo[1]); //активізація буфера vbo[1]
         gl.glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
         gl.glEnableVertexAttribArray(1); //layout (location=0) -- 0 - номер змінної у шейдері, яка приймає дані з буфера
+
+
 //
 ////передача змінної у шейдер
 //        gl.glProgramUniform1f(program, X_location, 0);// записуємо 0 у шейдер змінну за посиланням X_location. Посилання на змінну вже отримали раніше
@@ -268,14 +290,15 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
     @Override
     public void init(GLAutoDrawable arg0) {
         Triangles sphere = new Triangles();
+        Textures texters = new Textures();
         VPositions1 = sphere.sphere();
-
+        textureLink = texters.loadTexture("D:\\Java\\Idea Progects\\D_Lab1\\1616579747_4-p-chisto-zelenii-fon-5.jpg");//D:\Java\Idea Progects\D_Lab1\1655701112_2-celes-club-p-tekstura-planeti-krasivo-2.jpg
 
         GL4 gl=(GL4) GLContext.getCurrentGL();
         program=MakeProgram();
         gl.glGenVertexArrays(1, vao,0);
         gl.glBindVertexArray(vao[0]);
-        gl.glGenBuffers(2, vbo, 0);
+        gl.glGenBuffers(3, vbo, 0);
         gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);// 0-й буфер АКТИВНИЙ vbo[0]
         FloatBuffer f= Buffers.newDirectFloatBuffer(VPositions1);
         gl.glBufferData(GL_ARRAY_BUFFER, f.limit()*4, f, GL_STATIC_DRAW);//записуємо у АКТИВНИЙ буфер vbo[0]
@@ -283,6 +306,10 @@ public class GLFrame4 extends JFrame implements GLEventListener, KeyListener{
         gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);// 1-й буфер АКТИВНИЙ vbo[1]
         FloatBuffer f2=Buffers.newDirectFloatBuffer(sphere.normalsVec);
         gl.glBufferData(GL_ARRAY_BUFFER, f2.limit()*4, f2,GL_STATIC_DRAW);//записуємо у АКТИВНИЙ буфер vbo[1]
+
+        gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);// 2-й буфер АКТИВНИЙ vbo[2]
+        FloatBuffer f3=Buffers.newDirectFloatBuffer(sphere.textXY);
+        gl.glBufferData(GL_ARRAY_BUFFER, f3.limit()*4, f3,GL_STATIC_DRAW);//записуємо у АКТИВНИЙ буфер vbo[2]
 
     }
 
